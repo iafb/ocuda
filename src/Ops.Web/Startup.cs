@@ -63,6 +63,7 @@ namespace Ocuda.Ops.Web
             services.AddScoped<Controllers.Filter.OpsFilter>();
 
             // services
+            services.AddScoped<RosterService>();
             services.AddScoped<SectionService>();
             services.AddScoped<FileService>();
             services.AddScoped<LinkService>();
