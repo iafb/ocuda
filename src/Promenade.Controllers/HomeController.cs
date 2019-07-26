@@ -17,17 +17,15 @@ namespace Ocuda.Promenade.Controllers
 {
     [Route("")]
 
-    public class HomeController : BaseController
+    public class HomeController : BaseController<HomeController>
     {
         public static readonly int DaysInAWeek = 7;
         private readonly IConfiguration _config;
-        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(IConfiguration config,
-            ILogger<HomeController> logger)
+        public HomeController(ServiceFacades.Controller<HomeController> context,
+            IConfiguration config) : base(context)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [Route("")]
