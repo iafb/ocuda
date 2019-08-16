@@ -46,7 +46,6 @@ $(document).ready(function () {
     });
 
     textarea.bind('input propertychange', parseAndRender);
-    textarea.on('keyup click focus', markSelection);
 });
 //End of dingus
 
