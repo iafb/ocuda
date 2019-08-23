@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using Ocuda.Utility.TagHelpers.Extensions;
 
 namespace Ocuda.Utility.TagHelpers
 {
@@ -23,14 +24,14 @@ namespace Ocuda.Utility.TagHelpers
         private const string defaultWraperDivClass = "form-group row";
         private const string defaultLabelClass = "col-md-3 col-form-label text-md-right";
         private const string defaultInputClass = "form-control";
-        private const string defaultInnerDivClass = "col-md-9";
-        private const string defaultValidationMessageClass = "text-danger";
+        private const string defaultInnerDivClass = "form-group-inner col-md-9";
+        private const string defaultValidationMessageClass = "validation-message text-danger";
         private const string validationIgnoreClass = "validation-ignore";
 
         private readonly IHtmlGenerator _htmlGenerator;
         public FormGroupTagHelper(IHtmlGenerator htmlGenerator)
         {
-            _htmlGenerator = htmlGenerator 
+            _htmlGenerator = htmlGenerator
                 ?? throw new ArgumentNullException(nameof(htmlGenerator));
         }
 
@@ -54,8 +55,8 @@ namespace Ocuda.Utility.TagHelpers
         {
             // Manually create each child asp form tag helper element
             TagHelperOutput labelElement = await CreateLabelElement(context);
-            TagHelperOutput inputElement = await CreateInputElement(context, output);
-            TagHelperOutput validationMessageElement 
+            TagHelperOutput inputElement = await CreateInputElement(output);
+            TagHelperOutput validationMessageElement
                 = await CreateValidationMessageElement(context);
 
             // Wrap input and validation with column div
@@ -94,7 +95,7 @@ namespace Ocuda.Utility.TagHelpers
                     ViewContext = ViewContext
                 };
 
-            TagHelperOutput labelOutput = CreateTagHelperOutput("label");
+            TagHelperOutput labelOutput = CreateTagHelperOutput("label", null);
 
             await labelTagHelper.ProcessAsync(context, labelOutput);
 
@@ -115,23 +116,13 @@ namespace Ocuda.Utility.TagHelpers
             return labelOutput;
         }
 
-        private async Task<TagHelperOutput> CreateInputElement(TagHelperContext context,
-            TagHelperOutput output)
+        private async Task<TagHelperOutput> CreateInputElement(TagHelperOutput output)
         {
-            var inputOutput = CreateTagHelperOutput(output.TagName);
+            var attributes = new TagHelperAttributeList(output.Attributes);
+            attributes.AddCssClass(defaultInputClass);
+            attributes.Remove(new TagHelperAttribute(attributeName));
+            var inputOutput = CreateTagHelperOutput(output.TagName, attributes);
 
-            var attributeList = output.Attributes;
-            attributeList.Add(new TagHelperAttribute("class", defaultInputClass));
-            foreach (var attribute in output.Attributes)
-            {
-                if (attribute.Name != attributeName)
-                {
-                    var attributes = inputOutput.Attributes
-                        .FirstOrDefault(a => a.Name == attribute.Name)?.Value;
-                    inputOutput.Attributes
-                        .SetAttribute(attribute.Name, $"{attributes} {attribute.Value}".Trim());
-                }
-            }
             inputOutput.Content.AppendHtml(output.PreContent.GetContent());
             inputOutput.Content.AppendHtml(output.Content.GetContent());
             inputOutput.Content.AppendHtml(await output.GetChildContentAsync());
@@ -154,7 +145,7 @@ namespace Ocuda.Utility.TagHelpers
                     ViewContext = ViewContext
                 };
 
-            TagHelperOutput validationMessageOutput = CreateTagHelperOutput("span");
+            TagHelperOutput validationMessageOutput = CreateTagHelperOutput("span", null);
 
             var validatorClass = defaultValidationMessageClass;
 
@@ -183,11 +174,12 @@ namespace Ocuda.Utility.TagHelpers
             return div;
         }
 
-        private TagHelperOutput CreateTagHelperOutput(string tagName)
+        private TagHelperOutput CreateTagHelperOutput(string tagName,
+            TagHelperAttributeList attributes)
         {
             return new TagHelperOutput(
                 tagName: tagName,
-                attributes: new TagHelperAttributeList(),
+                attributes: attributes ?? new TagHelperAttributeList(),
                 getChildContentAsync: (_, __) =>
                 {
                     return Task.Factory.StartNew<TagHelperContent>(
