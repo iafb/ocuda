@@ -35,6 +35,15 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance",
             "CA1815:Override equals and operator equals on value types",
             Justification = "No reason to compare these site setting keys")]
+        public struct EmployeeSignup
+        {
+            public const string HomeSegment = "EmployeeSignup.HomeSegment";
+            public const string SubmittedSegment = "EmployeeSignup.SubmittedSegment";
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance",
+            "CA1815:Override equals and operator equals on value types",
+            Justification = "No reason to compare these site setting keys")]
         public struct Scheduling
         {
             public const string AvailableHours = "Scheduling.AvailableHours";
